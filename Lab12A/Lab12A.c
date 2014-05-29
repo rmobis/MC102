@@ -1,11 +1,11 @@
 /* Nome: Raphael Mobis Tacla
-* RA: 157104
-* Laboratorio 12A - CUT++
-*
-* Gera um CSV reduzido com base nos dois arquivos de entrada, imprimindo apenas
-* os campos desejados, permitindo alteração na ordem e repetiçãpo do mesmo campo
-* múltiplas vezes.
-*/
+ * RA: 157104
+ * Laboratorio 12A - CUT++
+ *
+ * Gera um CSV reduzido com base nos dois arquivos de entrada, imprimindo apenas
+ * os campos desejados, permitindo alteração na ordem e repetiçãpo do mesmo campo
+ * múltiplas vezes.
+ */
 
 #include <stdio.h>
 #include <string.h>
