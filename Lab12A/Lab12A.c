@@ -2,6 +2,9 @@
 * RA: 157104
 * Laboratorio 12A - CUT++
 *
+* Gera um CSV reduzido com base nos dois arquivos de entrada, imprimindo apenas
+* os campos desejados, permitindo alteração na ordem e repetiçãpo do mesmo campo
+* múltiplas vezes.
 */
 
 #include <stdio.h>
@@ -18,10 +21,13 @@
 /* Prototipo das funcoes utilizadas pela main */
 void generateReducedCSV(char fnamein[], char fnameout[]);
 
+/* Conta o número de colunas na primeira linha */
 int countRows(FILE *inputFile);
 
+/* Lê os campos requeridos */
 void readWantedFields(int **wantedFields, int *wantedFieldsAmount);
 
+/* Lê uma linha e seus campos do arquivo de entrada e imprime no arquivo de saída */
 bool getRow(FILE *inputFile, FILE *outputFile, int rowCount, char **lineData, int wantedFields[], int wantedFieldsAmount);
 
 int main(int argc, char *argv[]) {
@@ -48,7 +54,7 @@ void generateReducedCSV(char fnamein[], char fnameout[]) {
 
 	rowCount = countRows(inputFile);
 
-	lineData = (char **) malloc(rowCount * sizeof(char *));
+	lineData = malloc(rowCount * sizeof(char *));
 
 	readWantedFields(&wantedFields, &wantedFieldsAmount);
 
@@ -56,15 +62,22 @@ void generateReducedCSV(char fnamein[], char fnameout[]) {
 		endOfFile = getRow(inputFile, outputFile, rowCount, lineData, wantedFields, wantedFieldsAmount);
 	} while (!endOfFile);
 
+
 	fclose(inputFile);
 	fclose(outputFile);
+
 	free(lineData);
+	free(wantedFields);
 }
 
+/* Conta o número de colunas na primeira linha, contando a quantidade de
+ * separadores, acrescido de 1.
+ */
 int countRows(FILE *inputFile) {
 	char nextChar;
 	int rowCount = 1;
 
+	/* Volta ao início do arquivo, pois não assumimos que já estamos lá */
 	rewind(inputFile);
 
 	do {
@@ -75,24 +88,29 @@ int countRows(FILE *inputFile) {
 		}
 	} while (nextChar != EOL);
 
+	/* Volta ao início do arquivo novamente */
 	rewind(inputFile);
 
 	return rowCount;
 }
 
+/* Lê os campos requeridos */
 void readWantedFields(int **wantedFields, int *wantedFieldsAmount) {
 	int i;
 
 	scanf("%d", wantedFieldsAmount);
 
-	*wantedFields = (int *) malloc((*wantedFieldsAmount - 1) * sizeof(int));
+	*wantedFields = malloc(*wantedFieldsAmount * sizeof(int));
 
 	for (i = 0; i < *wantedFieldsAmount; i++) {
 		scanf("%d", &(*wantedFields)[i]);
+
+		/* Descresce um para termos um valor com indíce 0-based */
 		(*wantedFields)[i]--;
 	}
 }
 
+/* Lê uma linha e seus campos do arquivo de entrada e imprime no arquivo de saída */
 bool getRow(FILE *inputFile, FILE *outputFile, int rowCount, char **lineData, int wantedFields[], int wantedFieldsAmount) {
 	int curFieldLength;
 	char curField[MAX_FIELD_LENGTH + 1];
@@ -100,6 +118,7 @@ bool getRow(FILE *inputFile, FILE *outputFile, int rowCount, char **lineData, in
 	char nextChar;
 	int i;
 
+	/* Para cada campo da linha, ler e salvar num vetor auxiliar */
 	for (i = 0; i < rowCount; i++) {
 		curFieldLength = 0;
 
@@ -110,22 +129,24 @@ bool getRow(FILE *inputFile, FILE *outputFile, int rowCount, char **lineData, in
 
 		curField[--curFieldLength] = '\0';
 
-		lineData[i] = (char *) malloc((strlen(curField) + 1) * sizeof(char));
+		lineData[i] = malloc(501 * sizeof(char));
 		strcpy(lineData[i], curField);
 	}
 
-	for (i = 0; i < wantedFieldsAmount; i++) {
-		fprintf(outputFile, "%s", lineData[wantedFields[i]]);
-
-		if (i != wantedFieldsAmount - 1) {
-			fprintf(outputFile, ",");
-		}
-	}
-
+	/* Printar somente se esta linha não for a última, que está em branco */
 	if (!endOfFile) {
+		for (i = 0; i < wantedFieldsAmount; i++) {
+			fprintf(outputFile, "%s", lineData[wantedFields[i]]);
+
+			if (i != wantedFieldsAmount - 1) {
+				fprintf(outputFile, ",");
+			}
+		}
+
 		fprintf(outputFile, "\n");
 	}
 
+	/* Libera a memória */
 	for (i = 0; i < rowCount; i++) {
 		free(lineData[i]);
 	}
