@@ -102,10 +102,9 @@ int main(int argc, char **argv) {
 bool executarTransacao(Conta contas[], int numContas, Transacao trans) {
 	int i;
 	Conta *transConta = NULL;
-	bool contaEncontrada = false;
 
 	/* Procura a conta em que a transação será efetuada */
-	for (i = 0; i < numContas && !contaEncontrada; i++) {
+	for (i = 0; i < numContas && transConta == NULL; i++) {
 		if (trans.ag == contas[i].ag && trans.cc == contas[i].cc) {
 			transConta = &contas[i];
 		}
